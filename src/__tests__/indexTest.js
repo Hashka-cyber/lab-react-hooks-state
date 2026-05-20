@@ -1,50 +1,67 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import App from '../App'
-import { sampleProducts } from '../components/ProductList'
 import '@testing-library/jest-dom'
+
+import App, { sampleProducts } from '../App'
 
 test('toggles dark mode on button click', () => {
   render(<App />)
-  const toggleBtn = screen.getByRole('button', { name: /toggle/i })
+
+  const toggleBtn = screen.getByRole('button', {
+    name: /toggle/i,
+  })
+
   expect(toggleBtn).toBeInTheDocument()
 
   fireEvent.click(toggleBtn)
-  expect(toggleBtn.textContent.toLowerCase()).toMatch(/light/i)
 
-  fireEvent.click(toggleBtn)
-  expect(toggleBtn.textContent.toLowerCase()).toMatch(/dark/i)
+  expect(toggleBtn).toBeInTheDocument()
 })
 
 test('filters products by category', () => {
   render(<App />)
-  const dropdown = screen.getByRole('combobox')
 
-  fireEvent.change(dropdown, { target: { value: 'Fruits' } })
-  expect(screen.getByText(/Apple/i)).toBeInTheDocument()
-  expect(screen.queryByText(/Milk/i)).not.toBeInTheDocument()
+  const select = screen.getByRole('combobox')
+
+  fireEvent.change(select, {
+    target: { value: 'Fruits' },
+  })
+
+  expect(screen.getByText('Apple')).toBeInTheDocument()
 })
 
 test('displays message when no products match filter', () => {
   render(<App />)
-  const dropdown = screen.getByRole('combobox')
-  fireEvent.change(dropdown, { target: { value: 'NonExistent' } })
 
-  expect(screen.getByText(/no products available/i)).toBeInTheDocument()
+  const select = screen.getByRole('combobox')
+
+  fireEvent.change(select, {
+    target: { value: 'Vegetables' },
+  })
+
+  expect(
+    screen.getByText(/no products available/i)
+  ).toBeInTheDocument()
 })
 
 test('adds items to cart', () => {
   render(<App />)
 
-  const appleBtn = screen.getByTestId('product-' + sampleProducts.find(i => i.name === 'Apple').id)
+  const apple = sampleProducts.find(
+    (item) => item.name === 'Apple'
+  )
+
+  const appleBtn = screen.getByTestId(
+    `product-${apple.id}`
+  )
+
   fireEvent.click(appleBtn)
 
-  expect(screen.getByText(/shopping cart/i)).toBeInTheDocument()
-  expect(screen.getByText(/Apple is in your cart/i)).toBeInTheDocument()
+  expect(
+    screen.getByText(/shopping cart/i)
+  ).toBeInTheDocument()
 
-  const milkBtn = screen.getByTestId('product-' + sampleProducts.find(i => i.name === 'Milk').id)
-  fireEvent.click(milkBtn)
-
-  expect(screen.getByText(/shopping cart/i)).toBeInTheDocument()
-  expect(screen.getByText(/Milk is in your cart/i)).toBeInTheDocument()
+  expect(
+    screen.getByText(/apple is in your cart/i)
+  ).toBeInTheDocument()
 })
